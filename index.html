@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SelfImprove</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0d;
+    --bg2: #141414;
+    --bg3: #1c1c1c;
+    --bg4: #252525;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #f0ede8;
+    --text2: #9a9790;
+    --text3: #5a5855;
+    --accent: #c8f07a;
+    --accent2: #a8d45a;
+    --accent-dim: rgba(200,240,122,0.12);
+    --accent-dim2: rgba(200,240,122,0.06);
+    --blue: #7ab8f0;
+    --blue-dim: rgba(122,184,240,0.12);
+    --coral: #f07a7a;
+    --coral-dim: rgba(240,122,122,0.12);
+    --amber: #f0c87a;
+    --amber-dim: rgba(240,200,122,0.12);
+    --purple: #b07af0;
+    --purple-dim: rgba(176,122,240,0.12);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --font: 'Syne', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); }
+
+  /* LAYOUT */
+  .app { display: flex; height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    -webkit-app-region: drag;
+  }
+  .sidebar * { -webkit-app-region: no-drag; }
+
+  .logo {
+    padding: 0 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #0d0d0d; font-weight: 700;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
+
+  .nav { flex: 1; }
+  .nav-section { padding: 0 12px 4px; }
+  .nav-label {
+    font-size: 9px; font-family: var(--mono); letter-spacing: 0.12em;
+    color: var(--text3); text-transform: uppercase;
+    padding: 12px 8px 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: var(--radius-sm);
+    cursor: pointer; color: var(--text2);
+    font-size: 13px; font-weight: 600;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--accent-dim); color: var(--accent); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+  .sidebar-footer {
+    padding: 16px 20px 0;
+    border-top: 1px solid var(--border);
+  }
+  .date-display { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+  .streak-badge {
+    margin-top: 10px;
+    background: var(--accent-dim2);
+    border: 1px solid rgba(200,240,122,0.15);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-size: 12px; color: var(--text2);
+  }
+  .streak-badge span { color: var(--accent); font-weight: 700; }
+
+  /* MAIN */
+  .main { flex: 1; overflow-y: auto; }
+
+  .page { display: none; padding: 32px 36px; min-height: 100%; }
+  .page.active { display: block; }
+
+  /* PAGE HEADER */
+  .page-header { margin-bottom: 28px; }
+  .page-title { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+  .page-sub { font-size: 13px; color: var(--text2); margin-top: 4px; font-family: var(--mono); }
+
+  /* CARDS */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .card-title {
+    font-size: 11px; font-family: var(--mono); letter-spacing: 0.1em;
+    color: var(--text3); text-transform: uppercase; margin-bottom: 16px;
+  }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .gap-16 { display: flex; flex-direction: column; gap: 16px; }
+
+  /* STAT TILES */
+  .stat-tile {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .stat-label { font-size: 11px; color: var(--text3); font-family: var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+  .stat-value { font-size: 28px; font-weight: 700; margin-top: 6px; }
+  .stat-unit { font-size: 13px; color: var(--text2); font-weight: 400; }
+  .stat-change { font-size: 11px; color: var(--text3); margin-top: 4px; font-family: var(--mono); }
+  .stat-change.up { color: var(--accent); }
+  .stat-change.down { color: var(--coral); }
+
+  /* FORM ELEMENTS */
+  input[type="text"], input[type="number"], input[type="time"], select, textarea {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    padding: 9px 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  input::placeholder, textarea::placeholder { color: var(--text3); }
+  select option { background: var(--bg3); }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .form-row { display: flex; gap: 10px; align-items: flex-end; }
+  .form-row input, .form-row select { flex: 1; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .form-label { font-size: 11px; color: var(--text3); font-family: var(--mono); letter-spacing: 0.06em; }
+
+  /* BUTTONS */
+  .btn {
+    background: var(--bg4); border: 1px solid var(--border2);
+    color: var(--text2); border-radius: var(--radius-sm);
+    padding: 9px 16px; font-family: var(--font); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+  .btn-accent {
+    background: var(--accent); border-color: var(--accent);
+    color: #0d0d0d; font-weight: 700;
+  }
+  .btn-accent:hover { background: var(--accent2); border-color: var(--accent2); color: #0d0d0d; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-ghost { background: transparent; border-color: transparent; }
+  .btn-ghost:hover { background: var(--bg3); border-color: var(--border); }
+  .btn-danger:hover { background: var(--coral-dim); color: var(--coral); border-color: rgba(240,122,122,0.25); }
+
+  /* TAGS */
+  .tag {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 600; font-family: var(--mono);
+  }
+  .tag-green { background: var(--accent-dim); color: var(--accent); }
+  .tag-blue { background: var(--blue-dim); color: var(--blue); }
+  .tag-coral { background: var(--coral-dim); color: var(--coral); }
+  .tag-amber { background: var(--amber-dim); color: var(--amber); }
+  .tag-purple { background: var(--purple-dim); color: var(--purple); }
+
+  /* PROGRESS BAR */
+  .progress-wrap { background: var(--bg4); border-radius: 100px; height: 6px; overflow: hidden; }
+  .progress-bar { height: 100%; border-radius: 100px; transition: width 0.4s ease; }
+
+  /* SLEEP CHART */
+  .sleep-bars { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+  .sleep-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .sleep-bar {
+    width: 100%; border-radius: 4px 4px 0 0;
+    background: var(--blue-dim); border: 1px solid rgba(122,184,240,0.2);
+    transition: height 0.3s ease;
+    position: relative;
+  }
+  .sleep-bar.good { background: var(--accent-dim); border-color: rgba(200,240,122,0.2); }
+  .sleep-bar-label { font-size: 10px; color: var(--text3); font-family: var(--mono); }
+
+  /* LIST ITEMS */
+  .list-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .list-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .list-item:first-child { padding-top: 0; }
+
+  /* CHECKBOX */
+  .check-box {
+    width: 18px; height: 18px; min-width: 18px;
+    border: 1.5px solid var(--border2);
+    border-radius: 4px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; background: var(--bg3);
+    font-size: 11px; color: transparent;
+  }
+  .check-box.checked { background: var(--accent); border-color: var(--accent); color: #0d0d0d; }
+  .check-box.checked::after { content: '✓'; font-weight: 700; }
+
+  /* MOOD DOTS */
+  .mood-row { display: flex; gap: 8px; }
+  .mood-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer; transition: all 0.15s;
+    background: var(--bg3);
+  }
+  .mood-dot:hover { border-color: var(--border2); transform: scale(1.1); }
+  .mood-dot.selected { border-color: var(--accent); background: var(--accent-dim); }
+
+  /* GOAL PROGRESS */
+  .goal-item { padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .goal-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .goal-item:first-child { padding-top: 0; }
+  .goal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .goal-name { font-size: 14px; font-weight: 600; }
+  .goal-pct { font-size: 12px; color: var(--text2); font-family: var(--mono); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+  /* DASHBOARD RING */
+  .ring-container { display: flex; align-items: center; gap: 20px; }
+  .ring-labels { display: flex; flex-direction: column; gap: 10px; }
+  .ring-label-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
+  .ring-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 13px; }
+
+  /* SECTION GAP */
+  .section-gap { margin-bottom: 20px; }
+
+  /* INLINE EDIT */
+  .editable:hover { cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-decoration-color: var(--text3); }
+
+  /* WATER TRACKER */
+  .water-cups { display: flex; gap: 8px; flex-wrap: wrap; }
+  .water-cup {
+    width: 36px; height: 36px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border2);
+    background: var(--bg3); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; transition: all 0.15s;
+    user-select: none;
+  }
+  .water-cup.filled { background: var(--blue-dim); border-color: rgba(122,184,240,0.3); }
+  .water-cup:hover { border-color: var(--blue); }
+
+  /* PILL TABS */
+  .pill-tabs { display: flex; gap: 4px; background: var(--bg3); border-radius: var(--radius-sm); padding: 3px; width: fit-content; margin-bottom: 16px; }
+  .pill-tab { padding: 6px 16px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text2); transition: all 0.15s; }
+  .pill-tab.active { background: var(--bg4); color: var(--text); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg4); border: 1px solid var(--border2);
+    border-radius: var(--radius); padding: 12px 18px;
+    font-size: 13px; color: var(--text);
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.25s ease;
+    z-index: 9999; pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">S</div>
+      <div class="logo-text">SelfImprove</div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active" data-page="dashboard">
+          <span class="nav-icon">◈</span> Dashboard
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Track</div>
+        <div class="nav-item" data-page="sleep">
+          <span class="nav-icon">◐</span> Sleep
+        </div>
+        <div class="nav-item" data-page="workouts">
+          <span class="nav-icon">◆</span> Workouts
+        </div>
+        <div class="nav-item" data-page="eating">
+          <span class="nav-icon">○</span> Eating
+        </div>
+        <div class="nav-item" data-page="tasks">
+          <span class="nav-icon">□</span> Tasks
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Goals</div>
+        <div class="nav-item" data-page="goals">
+          <span class="nav-icon">◎</span> Goals
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="date-display" id="sidebar-date"></div>
+      <div class="streak-badge">🔥 <span id="streak-count">0</span> day streak</div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title">Good morning ✦</div>
+        <div class="page-sub" id="dash-date"></div>
+      </div>
+
+      <div class="grid-4 section-gap">
+        <div class="stat-tile">
+          <div class="stat-label">Sleep last night</div>
+          <div class="stat-value" id="dash-sleep">—<span class="stat-unit">h</span></div>
+          <div class="stat-change" id="dash-sleep-change">no entry yet</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Workouts this week</div>
+          <div class="stat-value" id="dash-workouts">0<span class="stat-unit">×</span></div>
+          <div class="stat-change" id="dash-workout-change">this week</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Tasks done today</div>
+          <div class="stat-value" id="dash-tasks">0<span class="stat-unit">/0</span></div>
+          <div class="stat-change" id="dash-tasks-change">today</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Water today</div>
+          <div class="stat-value" id="dash-water">0<span class="stat-unit">cups</span></div>
+          <div class="stat-change" id="dash-water-change">of 8 target</div>
+        </div>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <div class="card">
+          <div class="card-title">Today's tasks</div>
+          <div id="dash-task-list">
+            <div class="empty">No tasks for today</div>
+          </div>
+          <div style="margin-top:14px">
+            <div class="form-row">
+              <input type="text" id="quick-task" placeholder="Add a quick task…">
+              <button class="btn btn-accent" onclick="quickAddTask()">Add</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Goals progress</div>
+          <div id="dash-goals-list">
+            <div class="empty">No goals set yet</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Sleep this week</div>
+          <div class="sleep-bars" id="dash-sleep-chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Today's mood</div>
+          <div style="margin-bottom:12px;font-size:13px;color:var(--text2)">How are you feeling?</div>
+          <div class="mood-row" id="dash-mood">
+            <div class="mood-dot" data-mood="1" onclick="setMood(1)">😞</div>
+            <div class="mood-dot" data-mood="2" onclick="setMood(2)">😕</div>
+            <div class="mood-dot" data-mood="3" onclick="setMood(3)">😐</div>
+            <div class="mood-dot" data-mood="4" onclick="setMood(4)">🙂</div>
+            <div class="mood-dot" data-mood="5" onclick="setMood(5)">😄</div>
+          </div>
+          <div style="margin-top:20px">
+            <div class="card-title" style="margin-bottom:10px">Quick note</div>
+            <textarea id="daily-note" placeholder="Anything on your mind today…" style="min-height:80px" oninput="saveNote()"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLEEP -->
+    <div class="page" id="page-sleep">
+      <div class="page-header">
+        <div class="page-title">Sleep</div>
+        <div class="page-sub">Track your rest & recovery</div>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <div class="card">
+          <div class="card-title">Log tonight's sleep</div>
+          <div class="gap-16">
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">Bedtime</div>
+                <input type="time" id="sleep-bedtime" value="23:00">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Wake time</div>
+                <input type="time" id="sleep-waketime" value="07:00">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Sleep quality</div>
+              <select id="sleep-quality">
+                <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                <option value="4">⭐⭐⭐⭐ Good</option>
+                <option value="3" selected>⭐⭐⭐ OK</option>
+                <option value="2">⭐⭐ Poor</option>
+                <option value="1">⭐ Terrible</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Notes</div>
+              <textarea id="sleep-notes" placeholder="Dreams, interruptions, how you feel…"></textarea>
+            </div>
+            <button class="btn btn-accent" onclick="logSleep()">Log Sleep</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Sleep stats</div>
+          <div class="grid-2" style="gap:12px;margin-bottom:16px">
+            <div class="stat-tile">
+              <div class="stat-label">Avg this week</div>
+              <div class="stat-value" id="sleep-avg-week">—<span class="stat-unit">h</span></div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-label">Last night</div>
+              <div class="stat-value" id="sleep-last-night">—<span class="stat-unit">h</span></div>
+            </div>
+          </div>
+          <div class="card-title" style="margin-bottom:12px">Last 7 days</div>
+          <div class="sleep-bars" id="sleep-chart" style="height:100px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Sleep history</div>
+        <div id="sleep-history-list">
+          <div class="empty">No entries yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKOUTS -->
+    <div class="page" id="page-workouts">
+      <div class="page-header">
+        <div class="page-title">Workouts</div>
+        <div class="page-sub">Log your training sessions</div>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <div class="card">
+          <div class="card-title">Log a workout</div>
+          <div class="gap-16">
+            <div class="form-group">
+              <div class="form-label">Type</div>
+              <select id="workout-type">
+                <option>Strength Training</option>
+                <option>Running</option>
+                <option>Cycling</option>
+                <option>Swimming</option>
+                <option>HIIT</option>
+                <option>Yoga / Stretching</option>
+                <option>Walking</option>
+                <option>Sports</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">Duration (min)</div>
+                <input type="number" id="workout-duration" value="45" min="1">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Intensity</div>
+                <select id="workout-intensity">
+                  <option value="low">🟢 Low</option>
+                  <option value="medium" selected>🟡 Medium</option>
+                  <option value="high">🔴 High</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Notes</div>
+              <textarea id="workout-notes" placeholder="Exercises, sets, reps, how it went…"></textarea>
+            </div>
+            <button class="btn btn-accent" onclick="logWorkout()">Log Workout</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">This week</div>
+          <div class="grid-2" style="gap:12px; margin-bottom:20px">
+            <div class="stat-tile">
+              <div class="stat-label">Sessions</div>
+              <div class="stat-value" id="workout-week-count">0</div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-label">Total time</div>
+              <div class="stat-value" id="workout-week-time">0<span class="stat-unit">min</span></div>
+            </div>
+          </div>
+          <div class="card-title" style="margin-bottom:12px">Weekly activity</div>
+          <div id="workout-week-chart" style="display:flex;gap:4px;align-items:flex-end;height:60px"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <span id="wk-day-0" style="font-size:10px;color:var(--text3);font-family:var(--mono)">M</span>
+            <span id="wk-day-1" style="font-size:10px;color:var(--text3);font-family:var(--mono)">T</span>
+            <span id="wk-day-2" style="font-size:10px;color:var(--text3);font-family:var(--mono)">W</span>
+            <span id="wk-day-3" style="font-size:10px;color:var(--text3);font-family:var(--mono)">T</span>
+            <span id="wk-day-4" style="font-size:10px;color:var(--text3);font-family:var(--mono)">F</span>
+            <span id="wk-day-5" style="font-size:10px;color:var(--text3);font-family:var(--mono)">S</span>
+            <span id="wk-day-6" style="font-size:10px;color:var(--text3);font-family:var(--mono)">S</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Workout history</div>
+        <div id="workout-history-list">
+          <div class="empty">No workouts logged yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EATING -->
+    <div class="page" id="page-eating">
+      <div class="page-header">
+        <div class="page-title">Eating</div>
+        <div class="page-sub">Track meals & hydration</div>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <div class="card">
+          <div class="card-title">Log a meal</div>
+          <div class="gap-16">
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">Meal type</div>
+                <select id="meal-type">
+                  <option>Breakfast</option>
+                  <option>Lunch</option>
+                  <option>Dinner</option>
+                  <option>Snack</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <div class="form-label">Calories (approx)</div>
+                <input type="number" id="meal-calories" placeholder="500" min="0">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">What did you eat?</div>
+              <textarea id="meal-desc" placeholder="Chicken & rice, salad, smoothie…"></textarea>
+            </div>
+            <div class="form-group">
+              <div class="form-label">How healthy? (1–5)</div>
+              <select id="meal-health">
+                <option value="5">⭐⭐⭐⭐⭐ Very healthy</option>
+                <option value="4">⭐⭐⭐⭐ Healthy</option>
+                <option value="3" selected>⭐⭐⭐ OK</option>
+                <option value="2">⭐⭐ Not great</option>
+                <option value="1">⭐ Junk</option>
+              </select>
+            </div>
+            <button class="btn btn-accent" onclick="logMeal()">Log Meal</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Water intake</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Tap cups to track glasses of water</div>
+          <div class="water-cups" id="water-cups"></div>
+          <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center">
+            <div style="font-family:var(--mono);font-size:12px;color:var(--text2)">
+              <span id="water-count" style="color:var(--blue);font-size:20px;font-weight:700">0</span> / 8 glasses
+            </div>
+            <button class="btn btn-sm btn-ghost" onclick="resetWater()">Reset</button>
+          </div>
+
+          <div style="margin-top:20px">
+            <div class="card-title" style="margin-bottom:12px">Today's calories</div>
+            <div style="font-size:28px;font-weight:700" id="today-calories">0 <span style="font-size:14px;color:var(--text2);font-weight:400">kcal</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Today's meals</div>
+        <div id="meal-history-list">
+          <div class="empty">No meals logged today</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TASKS -->
+    <div class="page" id="page-tasks">
+      <div class="page-header">
+        <div class="page-title">Tasks</div>
+        <div class="page-sub">Stay on top of your to-dos</div>
+      </div>
+
+      <div class="pill-tabs" id="task-tab-bar">
+        <div class="pill-tab active" onclick="switchTaskTab('today')">Today</div>
+        <div class="pill-tab" onclick="switchTaskTab('week')">This Week</div>
+        <div class="pill-tab" onclick="switchTaskTab('month')">This Month</div>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <div class="card">
+          <div id="task-tab-title" class="card-title">Today's tasks</div>
+          <div id="task-list">
+            <div class="empty">No tasks yet</div>
+          </div>
+          <div style="margin-top:16px">
+            <div class="form-row">
+              <input type="text" id="new-task-input" placeholder="New task…" onkeydown="if(event.key==='Enter')addTask()">
+              <select id="new-task-priority" style="width:110px;min-width:110px">
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+                <option value="low">Low</option>
+              </select>
+              <button class="btn btn-accent" onclick="addTask()">Add</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Progress</div>
+          <div class="grid-2" style="gap:12px;margin-bottom:16px">
+            <div class="stat-tile">
+              <div class="stat-label">Done today</div>
+              <div class="stat-value" id="tasks-done-today">0/0</div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-label">Done this week</div>
+              <div class="stat-value" id="tasks-done-week">0/0</div>
+            </div>
+          </div>
+          <div class="card-title" style="margin-bottom:10px">Completion rate</div>
+          <div class="progress-wrap" style="height:8px">
+            <div class="progress-bar" id="task-progress-bar" style="width:0%;background:var(--accent)"></div>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:6px" id="task-progress-label">0% complete</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GOALS -->
+    <div class="page" id="page-goals">
+      <div class="page-header">
+        <div class="page-title">Goals</div>
+        <div class="page-sub">Set & track your bigger ambitions</div>
+      </div>
+
+      <div class="pill-tabs" id="goal-tab-bar">
+        <div class="pill-tab active" onclick="switchGoalTab('daily')">Daily</div>
+        <div class="pill-tab" onclick="switchGoalTab('weekly')">Weekly</div>
+        <div class="pill-tab" onclick="switchGoalTab('monthly')">Monthly</div>
+      </div>
+
+      <div class="grid-2 section-gap">
+        <div class="card">
+          <div id="goal-form-title" class="card-title">Add daily goal</div>
+          <div class="gap-16">
+            <div class="form-group">
+              <div class="form-label">Goal title</div>
+              <input type="text" id="goal-title" placeholder="e.g. Read 20 pages every day">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <div class="form-label">Target (optional)</div>
+                <input type="number" id="goal-target" placeholder="e.g. 30" min="1">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Unit</div>
+                <input type="text" id="goal-unit" placeholder="pages, km, hours…">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Category</div>
+              <select id="goal-category">
+                <option value="fitness">Fitness</option>
+                <option value="health">Health</option>
+                <option value="learning">Learning</option>
+                <option value="mindfulness">Mindfulness</option>
+                <option value="productivity">Productivity</option>
+                <option value="social">Social</option>
+                <option value="finance">Finance</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <button class="btn btn-accent" onclick="addGoal()">Add Goal</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div id="goals-list-title" class="card-title">Daily goals</div>
+          <div id="goals-list">
+            <div class="empty">No goals yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== DATA STORE ====================
+let db = {};
+const today = () => new Date().toISOString().slice(0,10);
+const todayKey = today();
+
+const catColors = {
+  fitness:'tag-green', health:'tag-coral', learning:'tag-blue',
+  mindfulness:'tag-purple', productivity:'tag-amber', social:'tag-blue',
+  finance:'tag-amber', other:'tag-green'
+};
+
+async function initDB() {
+  if (window.store) {
+    db = await window.store.load() || {};
+  } else {
+    const saved = localStorage.getItem('selfimprove_data');
+    db = saved ? JSON.parse(saved) : {};
+  }
+  if (!db.sleep) db.sleep = [];
+  if (!db.workouts) db.workouts = [];
+  if (!db.meals) db.meals = [];
+  if (!db.tasks) db.tasks = { today: [], week: [], month: [] };
+  if (!db.goals) db.goals = { daily: [], weekly: [], monthly: [] };
+  if (!db.water) db.water = {};
+  if (!db.mood) db.mood = {};
+  if (!db.notes) db.notes = {};
+  if (!db.streaks) db.streaks = { lastDate: null, count: 0 };
+  renderAll();
+}
+
+async function persist() {
+  if (window.store) {
+    await window.store.save(db);
+  } else {
+    localStorage.setItem('selfimprove_data', JSON.stringify(db));
+  }
+}
+
+// ==================== NAVIGATION ====================
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('page-' + el.dataset.page).classList.add('active');
+    if (el.dataset.page === 'dashboard') renderDashboard();
+  });
+});
+
+// ==================== TOAST ====================
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ==================== DATES ====================
+function formatDate(d) {
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+}
+function getWeekDates() {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  const mon = new Date(now); mon.setDate(now.getDate() + diff);
+  return Array.from({length:7}, (_,i) => {
+    const d = new Date(mon); d.setDate(mon.getDate() + i);
+    return d.toISOString().slice(0,10);
+  });
+}
+
+// ==================== SLEEP ====================
+function logSleep() {
+  const bed = document.getElementById('sleep-bedtime').value;
+  const wake = document.getElementById('sleep-waketime').value;
+  const quality = parseInt(document.getElementById('sleep-quality').value);
+  const notes = document.getElementById('sleep-notes').value;
+  if (!bed || !wake) { toast('Set bedtime & wake time'); return; }
+
+  let [bh,bm] = bed.split(':').map(Number);
+  let [wh,wm] = wake.split(':').map(Number);
+  let hours = wh + wm/60 - bh - bm/60;
+  if (hours < 0) hours += 24;
+  hours = Math.round(hours * 10) / 10;
+
+  db.sleep.unshift({ date: todayKey, bedtime: bed, waketime: wake, hours, quality, notes });
+  persist();
+  renderSleep();
+  renderDashboard();
+  toast(`Logged ${hours}h sleep`);
+  document.getElementById('sleep-notes').value = '';
+}
+
+function renderSleep() {
+  const entries = db.sleep;
+  const lastNight = entries[0];
+  document.getElementById('sleep-last-night').innerHTML = lastNight
+    ? `${lastNight.hours}<span class="stat-unit">h</span>` : '—<span class="stat-unit">h</span>';
+
+  const week = getWeekDates();
+  const weekEntries = week.map(d => entries.find(e => e.date === d));
+  const valid = weekEntries.filter(Boolean);
+  const avg = valid.length ? Math.round(valid.reduce((s,e) => s + e.hours, 0) / valid.length * 10) / 10 : 0;
+  document.getElementById('sleep-avg-week').innerHTML = avg ? `${avg}<span class="stat-unit">h</span>` : '—<span class="stat-unit">h</span>';
+
+  renderSleepChart('sleep-chart', week, weekEntries);
+
+  const list = document.getElementById('sleep-history-list');
+  if (!entries.length) { list.innerHTML = '<div class="empty">No entries yet</div>'; return; }
+  list.innerHTML = entries.slice(0,14).map(e => `
+    <div class="list-item">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${formatDate(e.date)} — ${e.hours}h</div>
+        <div style="font-size:12px;color:var(--text3);font-family:var(--mono)">${e.bedtime} → ${e.waketime} · ${'⭐'.repeat(e.quality)}</div>
+        ${e.notes ? `<div style="font-size:12px;color:var(--text2);margin-top:3px">${e.notes}</div>` : ''}
+      </div>
+      <button class="btn btn-sm btn-ghost btn-danger" onclick="deleteSleep('${e.date}')">✕</button>
+    </div>`).join('');
+}
+
+function renderSleepChart(id, week, entries) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const days = ['M','T','W','T','F','S','S'];
+  el.innerHTML = week.map((d,i) => {
+    const e = entries[i];
+    const h = e ? e.hours : 0;
+    const pct = Math.min(h / 10, 1);
+    const good = h >= 7;
+    return `<div class="sleep-bar-wrap">
+      <div class="sleep-bar ${good?'good':''}" style="height:${Math.max(pct * 100, 4)}%"></div>
+      <div class="sleep-bar-label">${days[i]}</div>
+    </div>`;
+  }).join('');
+}
+
+function deleteSleep(date) {
+  db.sleep = db.sleep.filter(e => e.date !== date);
+  persist(); renderSleep(); renderDashboard();
+}
+
+// ==================== WORKOUTS ====================
+function logWorkout() {
+  const type = document.getElementById('workout-type').value;
+  const duration = parseInt(document.getElementById('workout-duration').value);
+  const intensity = document.getElementById('workout-intensity').value;
+  const notes = document.getElementById('workout-notes').value;
+  if (!duration) { toast('Enter duration'); return; }
+
+  db.workouts.unshift({ date: todayKey, type, duration, intensity, notes });
+  persist(); renderWorkouts(); renderDashboard();
+  toast(`Logged ${duration}min ${type}`);
+  document.getElementById('workout-notes').value = '';
+}
+
+function renderWorkouts() {
+  const entries = db.workouts;
+  const week = getWeekDates();
+  const weekEntries = week.map(d => entries.filter(e => e.date === d));
+  const totalSessions = weekEntries.reduce((s,day) => s + day.length, 0);
+  const totalMin = weekEntries.reduce((s,day) => s + day.reduce((a,e) => a + e.duration, 0), 0);
+
+  document.getElementById('workout-week-count').textContent = totalSessions;
+  document.getElementById('workout-week-time').innerHTML = `${totalMin}<span class="stat-unit">min</span>`;
+
+  const chartEl = document.getElementById('workout-week-chart');
+  const max = Math.max(...weekEntries.map(d => d.reduce((s,e) => s+e.duration,0)), 60);
+  chartEl.innerHTML = week.map((d,i) => {
+    const mins = weekEntries[i].reduce((s,e) => s+e.duration, 0);
+    const pct = mins / max;
+    return `<div style="flex:1;background:${mins>0?'var(--accent-dim)':'var(--bg4)'};border:1px solid ${mins>0?'rgba(200,240,122,0.2)':'var(--border)'};border-radius:4px 4px 0 0;height:${Math.max(pct*100,4)}%;transition:height 0.3s"></div>`;
+  }).join('');
+
+  const list = document.getElementById('workout-history-list');
+  if (!entries.length) { list.innerHTML = '<div class="empty">No workouts logged yet</div>'; return; }
+  const intColors = { low:'tag-green', medium:'tag-amber', high:'tag-coral' };
+  list.innerHTML = entries.slice(0,20).map(e => `
+    <div class="list-item">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${e.type} · ${e.duration}min</div>
+        <div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:2px">${formatDate(e.date)}</div>
+        ${e.notes ? `<div style="font-size:12px;color:var(--text2);margin-top:3px">${e.notes}</div>` : ''}
+      </div>
+      <span class="tag ${intColors[e.intensity]}">${e.intensity}</span>
+      <button class="btn btn-sm btn-ghost btn-danger" onclick="deleteWorkout(${db.workouts.indexOf(e)})">✕</button>
+    </div>`).join('');
+}
+
+function deleteWorkout(i) {
+  db.workouts.splice(i,1);
+  persist(); renderWorkouts(); renderDashboard();
+}
+
+// ==================== EATING ====================
+function logMeal() {
+  const type = document.getElementById('meal-type').value;
+  const calories = parseInt(document.getElementById('meal-calories').value) || 0;
+  const desc = document.getElementById('meal-desc').value;
+  const health = parseInt(document.getElementById('meal-health').value);
+  if (!desc) { toast('Describe your meal'); return; }
+
+  db.meals.unshift({ date: todayKey, type, calories, desc, health });
+  persist(); renderEating(); renderDashboard();
+  toast(`Logged ${type}`);
+  document.getElementById('meal-desc').value = '';
+  document.getElementById('meal-calories').value = '';
+}
+
+function renderEating() {
+  const today = db.meals.filter(m => m.date === todayKey);
+  const totalCal = today.reduce((s,m) => s + m.calories, 0);
+  document.getElementById('today-calories').innerHTML = `${totalCal} <span style="font-size:14px;color:var(--text2);font-weight:400">kcal</span>`;
+
+  const list = document.getElementById('meal-history-list');
+  if (!today.length) { list.innerHTML = '<div class="empty">No meals logged today</div>'; return; }
+  const healthColors = {5:'tag-green',4:'tag-green',3:'tag-amber',2:'tag-coral',1:'tag-coral'};
+  list.innerHTML = today.map((m,i) => `
+    <div class="list-item">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${m.type} ${m.calories ? `· ${m.calories} kcal` : ''}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">${m.desc}</div>
+      </div>
+      <span class="tag ${healthColors[m.health]}">${'⭐'.repeat(m.health)}</span>
+      <button class="btn btn-sm btn-ghost btn-danger" onclick="deleteMeal(${i})">✕</button>
+    </div>`).join('');
+}
+
+function deleteMeal(i) {
+  const todayMeals = db.meals.filter(m => m.date === todayKey);
+  const meal = todayMeals[i];
+  const idx = db.meals.indexOf(meal);
+  if (idx > -1) db.meals.splice(idx, 1);
+  persist(); renderEating();
+}
+
+// ==================== WATER ====================
+function renderWater() {
+  const count = db.water[todayKey] || 0;
+  document.getElementById('water-count').textContent = count;
+  if (document.getElementById('dash-water')) {
+    document.getElementById('dash-water').innerHTML = `${count}<span class="stat-unit">cups</span>`;
+  }
+  const cups = document.getElementById('water-cups');
+  if (!cups) return;
+  cups.innerHTML = Array.from({length:8}, (_,i) => `
+    <div class="water-cup ${i < count ? 'filled' : ''}" onclick="toggleWater(${i})">💧</div>
+  `).join('');
+}
+
+function toggleWater(i) {
+  const count = db.water[todayKey] || 0;
+  db.water[todayKey] = i < count ? i : i + 1;
+  persist(); renderWater();
+}
+
+function resetWater() {
+  db.water[todayKey] = 0;
+  persist(); renderWater();
+}
+
+// ==================== TASKS ====================
+let currentTaskTab = 'today';
+
+function switchTaskTab(tab) {
+  currentTaskTab = tab;
+  document.querySelectorAll('#task-tab-bar .pill-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['today','week','month'][i] === tab);
+  });
+  const titles = { today: "Today's tasks", week: "This week's tasks", month: "This month's tasks" };
+  document.getElementById('task-tab-title').textContent = titles[tab];
+  renderTasks();
+}
+
+function addTask() {
+  const input = document.getElementById('new-task-input');
+  const priority = document.getElementById('new-task-priority').value;
+  const text = input.value.trim();
+  if (!text) return;
+  db.tasks[currentTaskTab].push({ id: Date.now(), text, priority, done: false, date: todayKey });
+  input.value = '';
+  persist(); renderTasks(); renderDashboard();
+}
+
+function quickAddTask() {
+  const input = document.getElementById('quick-task');
+  const text = input.value.trim();
+  if (!text) return;
+  db.tasks.today.push({ id: Date.now(), text, priority: 'normal', done: false, date: todayKey });
+  input.value = '';
+  persist(); renderTasks(); renderDashboard();
+}
+
+function toggleTask(tab, id) {
+  const task = db.tasks[tab].find(t => t.id === id);
+  if (task) task.done = !task.done;
+  persist(); renderTasks(); renderDashboard();
+}
+
+function deleteTask(tab, id) {
+  db.tasks[tab] = db.tasks[tab].filter(t => t.id !== id);
+  persist(); renderTasks(); renderDashboard();
+}
+
+function renderTasks() {
+  const tasks = db.tasks[currentTaskTab];
+  const list = document.getElementById('task-list');
+
+  if (!tasks.length) { list.innerHTML = '<div class="empty">No tasks yet</div>'; }
+  else {
+    const priColors = { high:'tag-coral', normal:'tag-blue', low:'tag-green' };
+    list.innerHTML = tasks.map(t => `
+      <div class="list-item">
+        <div class="check-box ${t.done ? 'checked' : ''}" onclick="toggleTask('${currentTaskTab}',${t.id})"></div>
+        <div style="flex:1;font-size:13px;${t.done ? 'text-decoration:line-through;color:var(--text3)' : ''}">${t.text}</div>
+        <span class="tag ${priColors[t.priority]}">${t.priority}</span>
+        <button class="btn btn-sm btn-ghost btn-danger" onclick="deleteTask('${currentTaskTab}',${t.id})">✕</button>
+      </div>`).join('');
+  }
+
+  // Stats
+  const todayTasks = db.tasks.today;
+  const todayDone = todayTasks.filter(t => t.done).length;
+  document.getElementById('tasks-done-today').textContent = `${todayDone}/${todayTasks.length}`;
+
+  const allTasks = [...db.tasks.today, ...db.tasks.week, ...db.tasks.month];
+  const weekDone = allTasks.filter(t => t.done).length;
+  document.getElementById('tasks-done-week').textContent = `${weekDone}/${allTasks.length}`;
+
+  const pct = todayTasks.length ? Math.round(todayDone / todayTasks.length * 100) : 0;
+  document.getElementById('task-progress-bar').style.width = pct + '%';
+  document.getElementById('task-progress-label').textContent = `${pct}% complete`;
+}
+
+// ==================== GOALS ====================
+let currentGoalTab = 'daily';
+
+function switchGoalTab(tab) {
+  currentGoalTab = tab;
+  document.querySelectorAll('#goal-tab-bar .pill-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['daily','weekly','monthly'][i] === tab);
+  });
+  const titles = { daily:'Add daily goal', weekly:'Add weekly goal', monthly:'Add monthly goal' };
+  const listTitles = { daily:'Daily goals', weekly:'Weekly goals', monthly:'Monthly goals' };
+  document.getElementById('goal-form-title').textContent = titles[tab];
+  document.getElementById('goals-list-title').textContent = listTitles[tab];
+  renderGoals();
+}
+
+function addGoal() {
+  const title = document.getElementById('goal-title').value.trim();
+  const target = parseInt(document.getElementById('goal-target').value) || null;
+  const unit = document.getElementById('goal-unit').value.trim();
+  const category = document.getElementById('goal-category').value;
+  if (!title) { toast('Enter a goal title'); return; }
+
+  db.goals[currentGoalTab].push({ id: Date.now(), title, target, unit, category, progress: 0, done: false });
+  document.getElementById('goal-title').value = '';
+  document.getElementById('goal-target').value = '';
+  document.getElementById('goal-unit').value = '';
+  persist(); renderGoals(); renderDashboard();
+  toast('Goal added!');
+}
+
+function updateGoalProgress(tab, id, val) {
+  const goal = db.goals[tab].find(g => g.id === id);
+  if (goal) {
+    goal.progress = Math.max(0, Math.min(parseInt(val) || 0, goal.target || 999));
+    if (goal.target) goal.done = goal.progress >= goal.target;
+  }
+  persist(); renderGoals(); renderDashboard();
+}
+
+function toggleGoalDone(tab, id) {
+  const goal = db.goals[tab].find(g => g.id === id);
+  if (goal) { goal.done = !goal.done; if (goal.done) goal.progress = goal.target || goal.progress; }
+  persist(); renderGoals(); renderDashboard();
+}
+
+function deleteGoal(tab, id) {
+  db.goals[tab] = db.goals[tab].filter(g => g.id !== id);
+  persist(); renderGoals(); renderDashboard();
+}
+
+function renderGoals() {
+  const goals = db.goals[currentGoalTab];
+  const list = document.getElementById('goals-list');
+
+  if (!goals.length) { list.innerHTML = '<div class="empty">No goals yet</div>'; return; }
+
+  list.innerHTML = goals.map(g => {
+    const pct = g.target ? Math.min(Math.round(g.progress / g.target * 100), 100) : (g.done ? 100 : 0);
+    return `
+    <div class="goal-item">
+      <div class="goal-header">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="check-box ${g.done ? 'checked' : ''}" onclick="toggleGoalDone('${currentGoalTab}',${g.id})"></div>
+          <div class="goal-name ${g.done ? 'style="text-decoration:line-through;color:var(--text3)"' : ''}">${g.title}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="tag ${catColors[g.category] || 'tag-blue'}">${g.category}</span>
+          <button class="btn btn-sm btn-ghost btn-danger" onclick="deleteGoal('${currentGoalTab}',${g.id})">✕</button>
+        </div>
+      </div>
+      ${g.target ? `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <input type="number" value="${g.progress}" min="0" max="${g.target}" style="width:70px"
+          onchange="updateGoalProgress('${currentGoalTab}',${g.id},this.value)">
+        <span style="font-size:12px;color:var(--text2);font-family:var(--mono)">/ ${g.target} ${g.unit}</span>
+        <span class="goal-pct">${pct}%</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar" style="width:${pct}%;background:${pct>=100?'var(--accent)':'var(--blue)'}"></div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ==================== MOOD ====================
+function setMood(val) {
+  db.mood[todayKey] = val;
+  persist();
+  document.querySelectorAll('.mood-dot').forEach(d => {
+    d.classList.toggle('selected', parseInt(d.dataset.mood) === val);
+  });
+}
+
+function saveNote() {
+  db.notes[todayKey] = document.getElementById('daily-note').value;
+  persist();
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard() {
+  const now = new Date();
+  const hour = now.getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const title = document.querySelector('#page-dashboard .page-title');
+  if (title) title.textContent = greet + ' ✦';
+
+  document.getElementById('dash-date').textContent = now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // Sleep
+  const lastSleep = db.sleep[0];
+  const sleepEl = document.getElementById('dash-sleep');
+  const sleepChg = document.getElementById('dash-sleep-change');
+  if (lastSleep) {
+    sleepEl.innerHTML = `${lastSleep.hours}<span class="stat-unit">h</span>`;
+    const cls = lastSleep.hours >= 7 ? 'up' : 'down';
+    sleepChg.className = `stat-change ${cls}`;
+    sleepChg.textContent = lastSleep.hours >= 7 ? 'Great sleep!' : 'Below target';
+  }
+
+  // Workouts this week
+  const week = getWeekDates();
+  const weekWorkouts = db.workouts.filter(w => week.includes(w.date));
+  document.getElementById('dash-workouts').innerHTML = `${weekWorkouts.length}<span class="stat-unit">×</span>`;
+
+  // Tasks
+  const todayTasks = db.tasks.today;
+  const doneTasks = todayTasks.filter(t => t.done).length;
+  document.getElementById('dash-tasks').innerHTML = `${doneTasks}<span class="stat-unit">/${todayTasks.length}</span>`;
+  document.getElementById('dash-tasks-change').textContent = doneTasks === todayTasks.length && todayTasks.length > 0 ? '✓ All done!' : 'today';
+
+  // Water
+  const waterCount = db.water[todayKey] || 0;
+  document.getElementById('dash-water').innerHTML = `${waterCount}<span class="stat-unit">cups</span>`;
+  const waterChg = document.getElementById('dash-water-change');
+  waterChg.className = `stat-change ${waterCount >= 8 ? 'up' : ''}`;
+  waterChg.textContent = waterCount >= 8 ? '✓ Goal met!' : `of 8 target`;
+
+  // Task list
+  const dashTaskList = document.getElementById('dash-task-list');
+  if (todayTasks.length === 0) {
+    dashTaskList.innerHTML = '<div class="empty">No tasks for today</div>';
+  } else {
+    dashTaskList.innerHTML = todayTasks.slice(0,6).map(t => `
+      <div class="list-item">
+        <div class="check-box ${t.done ? 'checked' : ''}" onclick="toggleTask('today',${t.id});renderDashboard()"></div>
+        <div style="flex:1;font-size:13px;${t.done ? 'text-decoration:line-through;color:var(--text3)' : ''}">${t.text}</div>
+      </div>`).join('');
+  }
+
+  // Goals
+  const allGoals = [...db.goals.daily, ...db.goals.weekly, ...db.goals.monthly].slice(0,4);
+  const dashGoals = document.getElementById('dash-goals-list');
+  if (!allGoals.length) {
+    dashGoals.innerHTML = '<div class="empty">No goals set yet</div>';
+  } else {
+    dashGoals.innerHTML = allGoals.map(g => {
+      const pct = g.target ? Math.min(Math.round(g.progress / g.target * 100), 100) : (g.done ? 100 : 0);
+      return `<div class="goal-item">
+        <div class="goal-header">
+          <div class="goal-name">${g.title}</div>
+          <div class="goal-pct">${pct}%</div>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:${pct>=100?'var(--accent)':'var(--blue)'}"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // Sleep chart
+  const weekDates = getWeekDates();
+  const weekSleepEntries = weekDates.map(d => db.sleep.find(e => e.date === d));
+  renderSleepChart('dash-sleep-chart', weekDates, weekSleepEntries);
+
+  // Mood
+  const savedMood = db.mood[todayKey];
+  if (savedMood) {
+    document.querySelectorAll('.mood-dot').forEach(d => {
+      d.classList.toggle('selected', parseInt(d.dataset.mood) === savedMood);
+    });
+  }
+
+  // Note
+  const note = document.getElementById('daily-note');
+  if (note && db.notes[todayKey]) note.value = db.notes[todayKey];
+}
+
+// ==================== STREAK ====================
+function updateStreak() {
+  const s = db.streaks;
+  const t = todayKey;
+  if (s.lastDate === t) return;
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+  const yKey = yesterday.toISOString().slice(0,10);
+  if (s.lastDate === yKey) { s.count++; }
+  else if (s.lastDate !== t) { s.count = 1; }
+  s.lastDate = t;
+  persist();
+  document.getElementById('streak-count').textContent = s.count;
+}
+
+// ==================== INIT ====================
+function renderAll() {
+  renderDashboard();
+  renderSleep();
+  renderWorkouts();
+  renderEating();
+  renderWater();
+  renderTasks();
+  renderGoals();
+  updateStreak();
+
+  const now = new Date();
+  document.getElementById('sidebar-date').textContent = now.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+  document.getElementById('streak-count').textContent = db.streaks.count;
+
+  const savedMood = db.mood[todayKey];
+  if (savedMood) {
+    document.querySelectorAll('.mood-dot').forEach(d => {
+      d.classList.toggle('selected', parseInt(d.dataset.mood) === savedMood);
+    });
+  }
+}
+
+initDB();
+
+// Enter key for quick task on dashboard
+document.getElementById('quick-task').addEventListener('keydown', e => {
+  if (e.key === 'Enter') quickAddTask();
+});
+</script>
+</body>
+</html>
